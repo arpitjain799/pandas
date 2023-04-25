@@ -1,34 +1,30 @@
-name: CodeQL
-on:
-  schedule:
-    # every day at midnight
-    - cron: "0 0 * * *"
-
-concurrency:
-  group: ${{ github.repository }}-${{ github.head_ref || github.sha }}-${{ github.workflow }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
-
 jobs:
   analyze:
-    runs-on: ubuntu-22.04
+    name: Analyze
     permissions:
       actions: read
       contents: read
       security-events: write
-
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+        queries: security-and-quality
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v2
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
     strategy:
       fail-fast: false
       matrix:
         language:
-          - python
-
-    steps:
-      - uses: actions/checkout@v3
-      - uses: github/codeql-action/init@v2
-        with:
-          languages: ${{ matrix.language }}
-      - uses: github/codeql-action/autobuild@v2
-      - uses: github/codeql-action/analyze@v2
+        - python
+name: CodeQL
+'on':
+  push:
+    branches:
+    - main
